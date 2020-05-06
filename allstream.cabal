@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d498f57c3306e8ebe9d940e48586d8f153d4ebcf5d69f5d82f83205f01d6bf11
+-- hash: aafc39979d68c0d29bb580ecdf374939083001f4ca86283f152c3476c9548bd9
 
 name:           allstream
 version:        0.1.0.0
@@ -27,13 +27,18 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      AllStream
+      AllStream.Envelope
+      AllStream.EventStore
   other-modules:
       Paths_allstream
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      HDBC
+    , HDBC-postgresql >=2.3.2.7
+    , base >=4.7 && <5
+    , uuid
   default-language: Haskell2010
 
 executable allstream-exe
@@ -44,8 +49,11 @@ executable allstream-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      allstream
+      HDBC
+    , HDBC-postgresql >=2.3.2.7
+    , allstream
     , base >=4.7 && <5
+    , uuid
   default-language: Haskell2010
 
 test-suite allstream-test
@@ -57,6 +65,9 @@ test-suite allstream-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      allstream
+      HDBC
+    , HDBC-postgresql >=2.3.2.7
+    , allstream
     , base >=4.7 && <5
+    , uuid
   default-language: Haskell2010

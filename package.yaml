@@ -21,6 +21,9 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- HDBC
+- HDBC-postgresql >=2.3.2.7
+- uuid
 
 library:
   source-dirs: src

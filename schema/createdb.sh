@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
+set -e
 
 DATABASE=allstreamtest
-dropdb --echo --interactive $DATABASE
+
+#dropdb --echo --interactive $DATABASE
+dropdb --echo $DATABASE
 createdb --echo $DATABASE
 
-psql $DATABASE < 001.types.sql
-psql $DATABASE < 002.events.sql
-psql $DATABASE < 003.streams
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+cat \
+  $DIR/001.config.sql \
+  $DIR/002.types.sql \
+  $DIR/003.events.sql \
+  | psql $DATABASE

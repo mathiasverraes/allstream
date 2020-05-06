@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import qualified AllStream
 
 main :: IO ()
-main = someFunc
+main = AllStream.go
