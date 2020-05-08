@@ -2,11 +2,6 @@ module AllStream
     ( go
     ) where
 
-import qualified Data.HashMap.Strict      as HashMap
-
-import           Data.Aeson               (toJSON)
-import           Database.HDBC
-import           Database.HDBC.PostgreSQL
 import           Domain.Commands          (Command(..))
 import           Domain.Events
 import           EventStore
