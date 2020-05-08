@@ -24,6 +24,10 @@ dependencies:
 - HDBC
 - HDBC-postgresql >=2.3.2.7
 - uuid
+- aeson
+- unordered-containers
+- containers
+- bytestring
 
 library:
   source-dirs: src
