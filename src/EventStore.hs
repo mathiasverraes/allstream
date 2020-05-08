@@ -28,11 +28,12 @@ data PersistedEvent =
         , recordedTime        :: String
         }
     deriving (Show, Eq)
+type Stream = [PersistedEvent]
 
 connect :: IO Connection
 connect = connectPostgreSQL "host=localhost dbname=allstreamtest user="
 
-stream :: Connection -> IO [PersistedEvent]
+stream :: Connection -> IO Stream
 stream conn = do
     stmt <- prepare conn "SELECT * FROM events ORDER BY partition_sequence_nr ASC;"
     --"SELECT partition_sequence_nr, event_id, event_type, domain_event_type, event_payload, recorded_time FROM events ORDER BY partition_sequence_nr ASC;"

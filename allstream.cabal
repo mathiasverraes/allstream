@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9ad63a36b06b75bdd16eeb1aa1e2a5463fa03d92c6eeec8d61aa48976b936a18
+-- hash: 9b6af0ea2bcc6ca50d8b3793292ab2149f71071c5a1e4302f570c178b4139df4
 
 name:           allstream
 version:        0.1.0.0
@@ -46,6 +46,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , containers
+    , flow
     , unordered-containers
     , uuid
   default-language: Haskell2010
@@ -65,6 +66,7 @@ executable allstream-exe
     , base >=4.7 && <5
     , bytestring
     , containers
+    , flow
     , unordered-containers
     , uuid
   default-language: Haskell2010
@@ -85,6 +87,7 @@ test-suite allstream-test
     , base >=4.7 && <5
     , bytestring
     , containers
+    , flow
     , unordered-containers
     , uuid
   default-language: Haskell2010

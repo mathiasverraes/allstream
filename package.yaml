@@ -28,6 +28,7 @@ dependencies:
 - unordered-containers
 - containers
 - bytestring
+- flow
 
 library:
   source-dirs: src
