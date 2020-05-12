@@ -2,28 +2,28 @@ module AllStream
     ( go
     ) where
 
-import           Domain.Commands          (Command(..))
+import qualified Data.UUID       as UUID
+import qualified Data.UUID.V4    as UUID (nextRandom)
+import           Domain.Commands (Command (..))
 import           Domain.Events
+import           Domain.Process
 import           EventStore
 import           Projection
 
+setup :: IO ()
+setup :: do
+    conn <- connect
+    
 go :: IO ()
 go = do
-    let command = CreateQuiz "myQuizId" "Category Theory" "Lambdaman"
-    let outcome = handle command ()
     conn <- connect
-    append conn outcome
-    stream <- stream conn
-    response <- replay stream countEvents
+    quizId <- UUID.nextRandom
+    let command = CreateQuiz quizId
+    let outcome = handle command ()
+    registerNewStream conn "GameRound" quizId
+    appendToStream conn "GameRound" quizId 1 outcome
+    stream' <- stream conn :: IO (Stream DomainEvent)
+    response <- replay stream' countEventsProjections
     putStrLn "Number of events: "
     print response
     return ()
-
-handle :: Command -> state -> DomainEvent
-handle (CreateQuiz quizId quizTitle ownerId) _state =
-    QuizWasCreated quizId quizTitle ownerId
-
-
-
-countEvents = Projection {initState = 0, step = step', query = id}
-step' n event = n + 1

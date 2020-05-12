@@ -2,7 +2,9 @@
 
 module EventStore where
 
-import           Data.Aeson               (ToJSON, Value, decode, encode)
+import           Data.Aeson               (FromJSON, ToJSON, Value, decode,
+                                           encode)
+import qualified Data.ByteString          as BS (unpack)
 import           Data.Map.Strict          ((!))
 import           Data.Maybe               (fromJust)
 import qualified Data.UUID                as UUID (UUID, fromByteString,
@@ -10,33 +12,47 @@ import qualified Data.UUID                as UUID (UUID, fromByteString,
 import qualified Data.UUID.V4             as UUID (nextRandom)
 import           Database.HDBC
 import           Database.HDBC.PostgreSQL
-import           Domain.Commands
-import           Domain.Events
-import qualified EventType                (eventType)
-import qualified Data.ByteString          as BS (unpack)
 
 type EventType = String
 
 type EventId = UUID.UUID
 
-data PersistedEvent =
+data PersistedEvent e =
     Persisted
         { partitionSequenceNr :: Int
-        , eventId             :: EventId
         , eventType           :: EventType
-        , eventPayload        :: DomainEvent
+        , eventId             :: EventId
+        , eventPayload        :: e
         , recordedTime        :: String
         }
     deriving (Show, Eq)
-type Stream = [PersistedEvent]
+
+type Stream e = [PersistedEvent e]
+
+type StreamType = String
+
+type StreamId = UUID.UUID
+
+class (FromJSON a, ToJSON a) =>
+      IsDomainEvent a
+    where
+    eventType :: a -> EventType
+
+data Aggregate =
+    Aggregate
+        { name            :: String
+        , supportedEvents :: [EventType]
+        }
 
 connect :: IO Connection
 connect = connectPostgreSQL "host=localhost dbname=allstreamtest user="
 
-stream :: Connection -> IO Stream
+stream :: (IsDomainEvent e) => Connection -> IO (Stream e)
 stream conn = do
-    stmt <- prepare conn "SELECT * FROM events ORDER BY partition_sequence_nr ASC;"
-    --"SELECT partition_sequence_nr, event_id, event_type, domain_event_type, event_payload, recorded_time FROM events ORDER BY partition_sequence_nr ASC;"
+    stmt <-
+        prepare
+            conn
+            "SELECT partition_sequence_nr, event_type, event_id, event_payload, recorded_time  FROM events ORDER BY partition_sequence_nr ASC;"
     execute stmt []
     rows <- fetchAllRowsMap stmt
     return $ toPersisted <$> rows
@@ -44,20 +60,45 @@ stream conn = do
     toPersisted row =
         Persisted
             { partitionSequenceNr = fromSql $ row ! "partition_sequence_nr"
-            , eventId = fromJust $ UUID.fromString $ fromSql (row ! "event_id")
             , eventType = fromSql $ row ! "event_type"
+            , eventId = fromJust $ UUID.fromString $ fromSql (row ! "event_id")
             , eventPayload = fromJust $ decode $ fromSql $ row ! "event_payload"
             , recordedTime = fromSql $ row ! "recorded_time"
             }
 
-append :: Connection -> DomainEvent -> IO ()
-append conn domainEvent = do
+append :: (IsDomainEvent event) => Connection -> event -> IO ()
+append conn event = do
     eventId <- UUID.nextRandom
     stmt <- prepare conn "CALL append(?, ?, ?);"
+    execute stmt [toSql $ eventType event, toSql $ UUID.toString eventId, toSql $ encode event]
+    commit conn
+
+appendToStream ::
+       (IsDomainEvent event) => Connection -> StreamType -> StreamId -> Int -> event -> IO ()
+appendToStream conn streamType streamId expectedStreamSequenceNr event = do
+    eventId <- UUID.nextRandom
+    stmt <- prepare conn "CALL append_to_stream(?, ?, ?, ?, ?, ?);"
     execute
         stmt
-        [ toSql $ UUID.toString eventId
-        , toSql $ EventType.eventType domainEvent
-        , toSql $ encode domainEvent
+        [ toSql streamType
+        , toSql $ UUID.toString streamId
+        , toSql expectedStreamSequenceNr
+        , toSql $ eventType event
+        , toSql $ UUID.toString eventId
+        , toSql $ encode event
         ]
     commit conn
+
+registerStreamType :: Connection -> StreamType -> IO ()
+registerStreamType conn streamType = do
+    stmt <- prepare conn "CALL register_stream_type(?);"
+    execute stmt [toSql streamType]
+    commit conn
+    return ()
+
+registerNewStream :: Connection -> StreamType -> StreamId -> IO ()
+registerNewStream conn streamType streamId = do
+    stmt <- prepare conn "CALL register_new_stream(?, ?);"
+    execute stmt [toSql streamType, toSql $ UUID.toString streamId]
+    commit conn
+    return ()

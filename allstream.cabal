@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b6af0ea2bcc6ca50d8b3793292ab2149f71071c5a1e4302f570c178b4139df4
+-- hash: 4ca9f93c89a6cf0d0fbead05c571bf2ac5c434fe1ef34f8847e01c24ec48562b
 
 name:           allstream
 version:        0.1.0.0
@@ -33,7 +33,6 @@ library
       Domain.Process
       Domain.Types
       EventStore
-      EventType
       Projection
   other-modules:
       Paths_allstream

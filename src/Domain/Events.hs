@@ -6,10 +6,46 @@ module Domain.Events where
 
 import           Data.Aeson
 import           Domain.Types
-import           EventType
+import           EventStore
 import           GHC.Generics
 
 data DomainEvent
+    = RoundHasStarted
+          { quizId :: QuizId
+          }
+    | PlayerHasJoined
+          { quizId   :: QuizId
+          , playerId :: PlayerId
+          }
+    deriving (Show, Eq, Generic)
+
+
+
+instance ToJSON DomainEvent
+
+instance FromJSON DomainEvent
+
+instance IsDomainEvent DomainEvent where
+    eventType RoundHasStarted {..}  = "RoundHasStarted"
+    eventType PlayerHasJoined {..}  = "PlayerHasJoined"
+{-
+    eventType PlayerHasRegistered {..}  = "PlayerHasRegistered"
+    eventType QuestionAddedToQuiz {..}  = "QuestionAddedToQuiz"
+    eventType QuizWasCreated {..}       = "QuizWasCreated"
+    eventType GameWasOpened {..}        = "GameWasOpened"
+    eventType QuestionWasAsked {..}     = "QuestionWasAsked"
+    eventType TimerHasExpired {..}      = "TimerHasExpired"
+    eventType GameWasStarted {..}       = "GameWasStarted"
+    eventType GameWasFinished {..}      = "GameWasFinished"
+    eventType QuizWasPublished {..}     = "QuizWasPublished"
+    eventType PlayerJoinedGame {..}     = "PlayerJoinedGame"
+    eventType AnswerWasGiven {..}       = "AnswerWasGiven"
+    eventType QuestionWasCompleted {..} = "QuestionWasCompleted"
+    eventType GameWasCancelled {..}     = "GameWasCancelled"
+-}
+
+
+{-
     = PlayerHasRegistered
           { playerId  :: PlayerId
           , lastName  :: String
@@ -66,23 +102,4 @@ data DomainEvent
     | GameWasCancelled
           { gameId :: GameId
           }
-    deriving (Show, Eq, Generic)
-
-instance ToJSON DomainEvent
-
-instance FromJSON DomainEvent
-
-instance EventType DomainEvent where
-    eventType PlayerHasRegistered {..}  = "PlayerHasRegistered"
-    eventType QuestionAddedToQuiz {..}  = "QuestionAddedToQuiz"
-    eventType QuizWasCreated {..}       = "QuizWasCreated"
-    eventType GameWasOpened {..}        = "GameWasOpened"
-    eventType QuestionWasAsked {..}     = "QuestionWasAsked"
-    eventType TimerHasExpired {..}      = "TimerHasExpired"
-    eventType GameWasStarted {..}       = "GameWasStarted"
-    eventType GameWasFinished {..}      = "GameWasFinished"
-    eventType QuizWasPublished {..}     = "QuizWasPublished"
-    eventType PlayerJoinedGame {..}     = "PlayerJoinedGame"
-    eventType AnswerWasGiven {..}       = "AnswerWasGiven"
-    eventType QuestionWasCompleted {..} = "QuestionWasCompleted"
-    eventType GameWasCancelled {..}     = "GameWasCancelled"
+          -}

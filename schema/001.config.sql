@@ -1,3 +1,0 @@
-\set ON_ERROR_STOP on
-
--- SET TIMEZONE='UTC';

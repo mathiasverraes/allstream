@@ -10,9 +10,7 @@ import           Data.Aeson
 
 data Command =
     CreateQuiz
-        { quizId    :: QuizId
-        , quizTitle :: String
-        , ownerId   :: OwnerId
+        { quizId :: QuizId
         }
     deriving (Show, Eq, Generic)
 
