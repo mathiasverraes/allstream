@@ -89,7 +89,7 @@ CREATE TABLE _template_for_stream_table
 
 
 
-CREATE PROCEDURE register_new_stream
+CREATE PROCEDURE start_new_stream
 (
     _stream_type symbol, _stream_id uuid
 ) AS

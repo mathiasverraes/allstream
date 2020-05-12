@@ -96,9 +96,9 @@ registerStreamType conn streamType = do
     commit conn
     return ()
 
-registerNewStream :: Connection -> StreamType -> StreamId -> IO ()
-registerNewStream conn streamType streamId = do
-    stmt <- prepare conn "CALL register_new_stream(?, ?);"
+startNewStream :: Connection -> StreamType -> StreamId -> IO ()
+startNewStream conn streamType streamId = do
+    stmt <- prepare conn "CALL start_new_stream(?, ?);"
     execute stmt [toSql streamType, toSql $ UUID.toString streamId]
     commit conn
     return ()

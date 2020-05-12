@@ -4,7 +4,7 @@ import qualified Data.UUID                as UUID (UUID)
 
 type GameId = String
 
-type PlayerId = String
+type PlayerId = UUID.UUID
 
 type OwnerId = String
 
