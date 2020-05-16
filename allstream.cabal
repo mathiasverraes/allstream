@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4ca9f93c89a6cf0d0fbead05c571bf2ac5c434fe1ef34f8847e01c24ec48562b
+-- hash: 884d1b1e64a97273e46ec7fbc0f552ab5edf481f816274a57e7db5e44acf2e63
 
 name:           allstream
 version:        0.1.0.0
@@ -38,6 +38,7 @@ library
       Paths_allstream
   hs-source-dirs:
       src
+  ghc-options: -W
   build-depends:
       HDBC
     , HDBC-postgresql >=2.3.2.7
