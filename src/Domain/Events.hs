@@ -28,6 +28,8 @@ instance FromJSON DomainEvent
 instance IsDomainEvent DomainEvent where
     eventType RoundHasStarted {..}  = "RoundHasStarted"
     eventType PlayerHasJoined {..}  = "PlayerHasJoined"
+    --belongsToStreams (RoundHasStarted quizId) = [StreamId "GameRound" quizId]
+    --belongsToStreams (PlayerHasJoined quizId playerId) = [StreamId "GameRound" quizId, StreamId "Player" playerId]
 {-
     eventType PlayerHasRegistered {..}  = "PlayerHasRegistered"
     eventType QuestionAddedToQuiz {..}  = "QuestionAddedToQuiz"

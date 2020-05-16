@@ -8,10 +8,14 @@ import           GHC.Generics
 
 import           Data.Aeson
 
-data Command =
-    CreateQuiz
-        { quizId :: QuizId
-        }
+data Command
+    = StartRound
+          { quizId :: QuizId
+          }
+    | JoinRound
+          { quizId   :: QuizId
+          , playerId :: PlayerId
+          }
     deriving (Show, Eq, Generic)
 
 instance ToJSON Command

@@ -1,0 +1,202 @@
+{-# LANGUAGE DeriveGeneric #-}
+
+module Domain.Events2 where
+
+import           GHC.Generics
+
+import           Data.Aeson
+
+import           Domain.Types
+
+class DomainEvent a where
+    eventType :: a -> String
+
+data PlayerHasRegistered =
+    PlayerHasRegistered
+        { playerId  :: PlayerId
+        , lastName  :: String
+        , firstName :: String
+        }
+    deriving (Show, Eq, Generic)
+
+data QuestionAddedToQuiz =
+    QuestionAddedToQuiz
+        { quizId     :: QuizId
+        , questionId :: QuestionId
+        , question   :: String
+        , answer     :: String
+        }
+    deriving (Show, Eq, Generic)
+
+data QuizWasCreated =
+    QuizWasCreated
+        { quizId    :: QuizId
+        , quizTitle :: String
+        , ownerId   :: OwnerId
+        }
+    deriving (Show, Eq, Generic)
+
+data GameWasOpened =
+    GameWasOpened
+        { quizId   :: QuizId
+        , gameId   :: GameId
+        , playerId :: PlayerId
+        }
+    deriving (Show, Eq, Generic)
+
+data QuestionWasAsked =
+    QuestionWasAsked
+        { questionId :: QuestionId
+        , gameId     :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+data TimerHasExpired =
+    TimerHasExpired
+        { questionId :: QuestionId
+        , playerId   :: PlayerId
+        , gameId     :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+data GameWasStarted =
+    GameWasStarted
+        { gameId :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+data GameWasFinished =
+    GameWasFinished
+        { gameId :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+data QuizWasPublished =
+    QuizWasPublished
+        { quizId :: QuizId
+        }
+    deriving (Show, Eq, Generic)
+
+data PlayerJoinedGame =
+    PlayerJoinedGame
+        { playerId :: PlayerId
+        , gameId   :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+data AnswerWasGiven =
+    AnswerWasGiven
+        { questionId :: QuestionId
+        , playerId   :: PlayerId
+        , gameId     :: GameId
+        , answer     :: String
+        }
+    deriving (Show, Eq, Generic)
+
+data QuestionWasCompleted =
+    QuestionWasCompleted
+        { questionId :: QuestionId
+        , gameId     :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+data GameWasCancelled =
+    GameWasCancelled
+        { gameId :: GameId
+        }
+    deriving (Show, Eq, Generic)
+
+instance ToJSON DomainEvent
+
+instance FromJSON DomainEvent
+
+instance ToJSON PlayerHasRegistered
+
+instance FromJSON PlayerHasRegistered
+
+instance DomainEvent PlayerHasRegistered where
+    eventType _ = "PlayerHasRegistered"
+
+instance ToJSON QuestionAddedToQuiz
+
+instance FromJSON QuestionAddedToQuiz
+
+instance DomainEvent QuestionAddedToQuiz where
+    eventType _ = "QuestionAddedToQuiz"
+
+instance ToJSON QuizWasCreated
+
+instance FromJSON QuizWasCreated
+
+instance DomainEvent QuizWasCreated where
+    eventType _ = "QuizWasCreated"
+
+instance ToJSON GameWasOpened
+
+instance FromJSON GameWasOpened
+
+instance DomainEvent GameWasOpened where
+    eventType _ = "GameWasOpened"
+
+instance ToJSON QuestionWasAsked
+
+instance FromJSON QuestionWasAsked
+
+instance DomainEvent QuestionWasAsked where
+    eventType _ = "QuestionWasAsked"
+
+instance ToJSON TimerHasExpired
+
+instance FromJSON TimerHasExpired
+
+instance DomainEvent TimerHasExpired where
+    eventType _ = "TimerHasExpired"
+
+instance ToJSON GameWasStarted
+
+instance FromJSON GameWasStarted
+
+instance DomainEvent GameWasStarted where
+    eventType _ = "GameWasStarted"
+
+instance ToJSON GameWasFinished
+
+instance FromJSON GameWasFinished
+
+instance DomainEvent GameWasFinished where
+    eventType _ = "GameWasFinished"
+
+instance ToJSON QuizWasPublished
+
+instance FromJSON QuizWasPublished
+
+instance DomainEvent QuizWasPublished where
+    eventType _ = "QuizWasPublished"
+
+instance ToJSON PlayerJoinedGame
+
+instance FromJSON PlayerJoinedGame
+
+instance DomainEvent PlayerJoinedGame where
+    eventType _ = "PlayerJoinedGame"
+
+instance ToJSON AnswerWasGiven
+
+instance FromJSON AnswerWasGiven
+
+instance DomainEvent AnswerWasGiven where
+    eventType _ = "AnswerWasGiven"
+
+instance ToJSON QuestionWasCompleted
+
+instance FromJSON QuestionWasCompleted
+
+instance DomainEvent QuestionWasCompleted where
+    eventType _ = "QuestionWasCompleted"
+
+instance ToJSON GameWasCancelled
+
+instance FromJSON GameWasCancelled
+
+instance DomainEvent GameWasCancelled where
+    eventType _ = "GameWasCancelled"
