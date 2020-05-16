@@ -1,4 +1,4 @@
-module Domain.Process where
+module Domain.GameRound where
 
 import           Control.Monad            (when)
 import           Data.List                (foldl')
@@ -16,15 +16,15 @@ handle (StartRound quizId) conn = do
 handle (JoinRound quizId playerId) conn = do
     stream <- fetchStream conn "GameRound" quizId :: IO (Stream DomainEvent)
     playerCount <- replay stream countPlayersInRound
-    print playerCount
-    
     let expectedStreamId = 1 + maximum (streamSequenceNr <$> stream)
     when (playerCount < 3) $
         appendToStream conn "GameRound" quizId expectedStreamId (PlayerHasJoined quizId playerId)
     when (playerCount >= 3) $
         appendToStream conn "GameRound" quizId expectedStreamId (RoundIsFull quizId playerId)
-        
-countPlayersInRound = Projection {initState = 0, step = step', query = id}
 
-step' n PlayerHasJoined {} = n + 1
-step' n _                  = n
+countPlayersInRound = Projection {initState = 0, step = when_, query = id}
+
+when_ PlayerHasJoined {} 
+    n = n + 1
+when_ _                  
+    n = n

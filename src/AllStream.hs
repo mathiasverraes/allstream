@@ -4,7 +4,7 @@ module AllStream
 
 import qualified Data.UUID.V4    as UUID (nextRandom)
 import           Domain.Commands (Command (..))
-import           Domain.Process
+import           Domain.GameRound
 import           EventStore
 
 go :: IO ()
