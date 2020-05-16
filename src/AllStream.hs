@@ -4,8 +4,10 @@ module AllStream
 
 import qualified Data.UUID.V4    as UUID (nextRandom)
 import           Domain.Commands (Command (..))
+import           Domain.Events
 import           Domain.GameRound
 import           EventStore
+
 
 go :: IO ()
 go = do
@@ -31,8 +33,8 @@ go = do
     appendToStream conn "GameRound" quizId1 3 (PlayerHasJoined quizId1 playerId2)
     -}
     --
-    -- stream' <- fetchAll conn :: IO (Stream DomainEvent)
-    -- mapM_ print stream'
+    stream' <- fetchAll conn :: IO (Stream DomainEvent)
+    mapM_ print stream'
     --
     -- stream2' <- fetchStream conn "GameRound" quizId1 :: IO (Stream DomainEvent)
     -- mapM_ print (eventPayload <$> stream2')

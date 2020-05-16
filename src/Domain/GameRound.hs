@@ -11,12 +11,12 @@ import           Projection
 handle :: Command -> Connection -> IO ()
 handle (StartRound quizId) conn = do
     stream <- fetchStream conn "GameRound" quizId :: IO (Stream DomainEvent)
-    let expectedStreamId = 1 + foldl' max 0 (streamSequenceNr <$> stream)
+    let expectedStreamId = 1 + foldl' max 0 (streamSeq <$> stream)
     appendToStream conn "GameRound" quizId expectedStreamId (RoundHasStarted quizId)
 handle (JoinRound quizId playerId) conn = do
     stream <- fetchStream conn "GameRound" quizId :: IO (Stream DomainEvent)
     playerCount <- replay stream countPlayersInRound
-    let expectedStreamId = 1 + maximum (streamSequenceNr <$> stream)
+    let expectedStreamId = 1 + maximum (streamSeq <$> stream)
     when (playerCount < 3) $
         appendToStream conn "GameRound" quizId expectedStreamId (PlayerHasJoined quizId playerId)
     when (playerCount >= 3) $
@@ -24,7 +24,7 @@ handle (JoinRound quizId playerId) conn = do
 
 countPlayersInRound = Projection {initState = 0, step = when_, query = id}
 
-when_ PlayerHasJoined {} 
+when_ PlayerHasJoined {}
     n = n + 1
-when_ _                  
+when_ _
     n = n
