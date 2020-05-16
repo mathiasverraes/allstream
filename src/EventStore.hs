@@ -2,13 +2,10 @@
 
 module EventStore where
 
-import           Data.Aeson               (FromJSON, ToJSON, Value, decode,
-                                           encode)
-import qualified Data.ByteString          as BS (unpack)
+import           Data.Aeson               (FromJSON, ToJSON, decode, encode)
 import           Data.Map.Strict          ((!))
 import           Data.Maybe               (fromJust)
-import qualified Data.UUID                as UUID (UUID, fromByteString,
-                                                   fromString, toString)
+import qualified Data.UUID                as UUID (UUID, fromString, toString)
 import qualified Data.UUID.V4             as UUID (nextRandom)
 import           Database.HDBC
 import           Database.HDBC.PostgreSQL
@@ -88,7 +85,8 @@ fetchStream conn streamType streamId = do
             , streamSequenceNr = fromSql $ row ! "stream_sequence_nr"
             }
 
-appendToStream :: (IsDomainEvent event) => Connection -> StreamType -> StreamId -> Int -> event -> IO ()
+appendToStream ::
+       (IsDomainEvent event) => Connection -> StreamType -> StreamId -> Int -> event -> IO ()
 appendToStream conn streamType streamId expectedStreamSequenceNr event = do
     eventId <- UUID.nextRandom
     stmt <- prepare conn "CALL append_to_stream(?, ?, ?, ?, ?, ?);"

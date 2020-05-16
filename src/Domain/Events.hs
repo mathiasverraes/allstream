@@ -17,17 +17,20 @@ data DomainEvent
           { quizId   :: QuizId
           , playerId :: PlayerId
           }
+    | RoundIsFull
+          { quizId   :: QuizId
+          , playerId :: PlayerId
+          }
     deriving (Show, Eq, Generic)
-
-
 
 instance ToJSON DomainEvent
 
 instance FromJSON DomainEvent
 
 instance IsDomainEvent DomainEvent where
-    eventType RoundHasStarted {..}  = "RoundHasStarted"
-    eventType PlayerHasJoined {..}  = "PlayerHasJoined"
+    eventType RoundHasStarted {..} = "RoundHasStarted"
+    eventType PlayerHasJoined {..} = "PlayerHasJoined"
+    eventType RoundIsFull {..} = "RoundIsFull"
     --belongsToStreams (RoundHasStarted quizId) = [StreamId "GameRound" quizId]
     --belongsToStreams (PlayerHasJoined quizId playerId) = [StreamId "GameRound" quizId, StreamId "Player" playerId]
 {-
@@ -45,8 +48,6 @@ instance IsDomainEvent DomainEvent where
     eventType QuestionWasCompleted {..} = "QuestionWasCompleted"
     eventType GameWasCancelled {..}     = "GameWasCancelled"
 -}
-
-
 {-
     = PlayerHasRegistered
           { playerId  :: PlayerId

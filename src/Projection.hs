@@ -1,7 +1,5 @@
 module Projection where
 
-import           Database.HDBC.PostgreSQL (Connection)
-import           Domain.Events            (DomainEvent)
 import           EventStore
 import           Flow
 import Data.List (foldl')
