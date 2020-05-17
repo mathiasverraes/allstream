@@ -1,6 +1,17 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module EventStore where
+module EventStore
+    ( EventStore
+    , Payload(eventType)
+    , PersistedEvent(..)
+    , Stream
+    , StreamType
+    , StreamId
+    , connect
+    , fetchAll
+    , fetchStream
+    , appendToStream
+    ) where
 
 import           Data.Aeson               (FromJSON, ToJSON, decode, encode)
 import           Data.Map.Strict          (Map, (!))
@@ -9,6 +20,8 @@ import qualified Data.UUID                as UUID (UUID, fromString, toString)
 import qualified Data.UUID.V4             as UUID (nextRandom)
 import           Database.HDBC
 import           Database.HDBC.PostgreSQL
+
+type EventStore e = Connection
 
 type EventType = String
 
@@ -38,10 +51,10 @@ class (FromJSON a, ToJSON a) =>
     where
     eventType :: a -> EventType
 
-connect :: IO Connection
+connect :: IO (EventStore e)
 connect = connectPostgreSQL "host=localhost dbname=allstreamtest user="
 
-fetchAll :: (Payload e) => Connection -> IO (Stream e)
+fetchAll :: (Payload e) => EventStore e -> IO (Stream e)
 fetchAll conn = do
     stmt <-
         prepare
@@ -51,7 +64,7 @@ fetchAll conn = do
     rows <- fetchAllRowsMap stmt
     return $ toPersisted <$> rows
 
-fetchStream :: (Payload e) => Connection -> StreamType -> StreamId -> IO (Stream e)
+fetchStream :: (Payload e) => EventStore e -> StreamType -> StreamId -> IO (Stream e)
 fetchStream conn streamType streamId = do
     stmt <-
         prepare
@@ -74,8 +87,7 @@ toPersisted row =
         , streamSeq = fromSql $ row ! "stream_seq"
         }
 
-appendToStream ::
-       (Payload event) => Connection -> StreamType -> StreamId -> Int -> event -> IO ()
+appendToStream :: (Payload event) => EventStore e -> StreamType -> StreamId -> Int -> event -> IO ()
 appendToStream conn streamType streamId expectedStreamSeq event = do
     eventId <- UUID.nextRandom
     stmt <- prepare conn "CALL append_to_stream(?, ?, ?, ?, ?, ?);"

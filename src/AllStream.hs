@@ -11,7 +11,7 @@ import           EventStore
 
 go :: IO ()
 go = do
-    conn <- connect
+    eventStore <- connect
     quizId1 <- UUID.nextRandom
     --quizId2 <- UUID.nextRandom
     playerId1 <- UUID.nextRandom
@@ -19,11 +19,11 @@ go = do
     playerId3 <- UUID.nextRandom
     playerId4 <- UUID.nextRandom
     --
-    handle (StartRound quizId1) conn
-    handle (JoinRound quizId1 playerId1) conn
-    handle (JoinRound quizId1 playerId2) conn
-    handle (JoinRound quizId1 playerId3) conn
-    handle (JoinRound quizId1 playerId4) conn
+    handle (StartRound quizId1) eventStore
+    handle (JoinRound quizId1 playerId1) eventStore
+    handle (JoinRound quizId1 playerId2) eventStore
+    handle (JoinRound quizId1 playerId3) eventStore
+    handle (JoinRound quizId1 playerId4) eventStore
     --let outcome = handle command ()
     {-
     appendToStream conn "GameRound" quizId1 1 (RoundHasStarted quizId1)
@@ -33,7 +33,7 @@ go = do
     appendToStream conn "GameRound" quizId1 3 (PlayerHasJoined quizId1 playerId2)
     -}
     --
-    stream' <- fetchAll conn :: IO (Stream DomainEvent)
+    stream' <- fetchAll eventStore :: IO (Stream DomainEvent)
     mapM_ print stream'
     --
     -- stream2' <- fetchStream conn "GameRound" quizId1 :: IO (Stream DomainEvent)
