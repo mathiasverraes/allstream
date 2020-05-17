@@ -3,7 +3,7 @@
 module EventStore where
 
 import           Data.Aeson               (FromJSON, ToJSON, decode, encode)
-import           Data.Map.Strict          ((!))
+import           Data.Map.Strict          (Map, (!))
 import           Data.Maybe               (fromJust)
 import qualified Data.UUID                as UUID (UUID, fromString, toString)
 import qualified Data.UUID.V4             as UUID (nextRandom)
@@ -34,14 +34,14 @@ data PersistedEvent e =
     deriving (Show)
 
 class (FromJSON a, ToJSON a) =>
-      IsDomainEvent a
+      Payload a
     where
     eventType :: a -> EventType
 
 connect :: IO Connection
 connect = connectPostgreSQL "host=localhost dbname=allstreamtest user="
 
-fetchAll :: (IsDomainEvent e) => Connection -> IO (Stream e)
+fetchAll :: (Payload e) => Connection -> IO (Stream e)
 fetchAll conn = do
     stmt <-
         prepare
@@ -50,20 +50,8 @@ fetchAll conn = do
     execute stmt []
     rows <- fetchAllRowsMap stmt
     return $ toPersisted <$> rows
-  where
-    toPersisted row =
-        Persisted
-            { partitionSeq = fromSql $ row ! "partition_seq"
-            , eventType = fromSql $ row ! "event_type"
-            , eventId = fromJust $ UUID.fromString $ fromSql (row ! "event_id")
-            , eventPayload = fromJust $ decode $ fromSql $ row ! "event_payload"
-            , recordedTime = fromSql $ row ! "recorded_time"
-            , streamType = fromSql $ row ! "stream_type"
-            , streamId = fromJust $ UUID.fromString $ fromSql (row ! "stream_id")
-            , streamSeq = fromSql $ row ! "stream_seq"
-            }
 
-fetchStream :: (IsDomainEvent e) => Connection -> StreamType -> StreamId -> IO (Stream e)
+fetchStream :: (Payload e) => Connection -> StreamType -> StreamId -> IO (Stream e)
 fetchStream conn streamType streamId = do
     stmt <-
         prepare
@@ -72,21 +60,22 @@ fetchStream conn streamType streamId = do
     execute stmt [toSql streamType, toSql $ UUID.toString streamId]
     rows <- fetchAllRowsMap stmt
     return $ toPersisted <$> rows
-  where
-    toPersisted row =
-        Persisted
-            { partitionSeq = fromSql $ row ! "partition_seq"
-            , eventType = fromSql $ row ! "event_type"
-            , eventId = fromJust $ UUID.fromString $ fromSql (row ! "event_id")
-            , eventPayload = fromJust $ decode $ fromSql $ row ! "event_payload"
-            , recordedTime = fromSql $ row ! "recorded_time"
-            , streamType = fromSql $ row ! "stream_type"
-            , streamId = fromJust $ UUID.fromString $ fromSql (row ! "stream_id")
-            , streamSeq = fromSql $ row ! "stream_seq"
-            }
+
+toPersisted :: Payload e => Map String SqlValue -> PersistedEvent e
+toPersisted row =
+    Persisted
+        { partitionSeq = fromSql $ row ! "partition_seq"
+        , eventType = fromSql $ row ! "event_type"
+        , eventId = fromJust $ UUID.fromString $ fromSql (row ! "event_id")
+        , eventPayload = fromJust $ decode $ fromSql $ row ! "event_payload"
+        , recordedTime = fromSql $ row ! "recorded_time"
+        , streamType = fromSql $ row ! "stream_type"
+        , streamId = fromJust $ UUID.fromString $ fromSql (row ! "stream_id")
+        , streamSeq = fromSql $ row ! "stream_seq"
+        }
 
 appendToStream ::
-       (IsDomainEvent event) => Connection -> StreamType -> StreamId -> Int -> event -> IO ()
+       (Payload event) => Connection -> StreamType -> StreamId -> Int -> event -> IO ()
 appendToStream conn streamType streamId expectedStreamSeq event = do
     eventId <- UUID.nextRandom
     stmt <- prepare conn "CALL append_to_stream(?, ?, ?, ?, ?, ?);"

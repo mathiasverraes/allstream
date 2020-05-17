@@ -27,7 +27,7 @@ instance ToJSON DomainEvent
 
 instance FromJSON DomainEvent
 
-instance IsDomainEvent DomainEvent where
+instance Payload DomainEvent where
     eventType RoundHasStarted {..} = "RoundHasStarted"
     eventType PlayerHasJoined {..} = "PlayerHasJoined"
     eventType RoundIsFull {..} = "RoundIsFull"
