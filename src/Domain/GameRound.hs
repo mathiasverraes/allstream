@@ -1,27 +1,33 @@
-module Domain.GameRound where
+{-# LANGUAGE NamedFieldPuns #-}
 
-import           Control.Monad            (when)
-import           Data.List                (foldl')
-import           Domain.Commands
+module Domain.GameRound (handle) where
+
+import           Data.List       (foldl')
+import qualified Domain.Commands as Cmd
 import           Domain.Events
 import           EventStore
+import           Flow
 import           Projection
 
-handle :: Command -> EventStore e -> IO ()
-handle (StartRound quizId) es = do
-    stream <- fetchStream es "GameRound" quizId :: IO (Stream DomainEvent)
-    let expectedStreamId = 1 + foldl' max 0 (streamSeq <$> stream)
-    appendToStream es "GameRound" quizId expectedStreamId (RoundHasStarted quizId)
-handle (JoinRound quizId playerId) es = do
-    stream <- fetchStream es "GameRound" quizId :: IO (Stream DomainEvent)
-    playerCount <- replay stream countPlayersInRound
-    let expectedStreamId = 1 + maximum (streamSeq <$> stream)
-    when (playerCount < 3) $
-        appendToStream es "GameRound" quizId expectedStreamId (PlayerHasJoined quizId playerId)
-    when (playerCount >= 3) $
-        appendToStream es "GameRound" quizId expectedStreamId (RoundIsFull quizId playerId)
+type State = Int
 
-countPlayersInRound = Projection {initState = 0, step = when_, query = id}
+countPlayersInRound = Projection {initState = 0, step = when_, transform = id}
 
+when_ :: DomainEvent -> State -> State
 when_ PlayerHasJoined {} n = n + 1
 when_ _ n                  = n
+
+handle :: Cmd.Command  -> EventStore event -> IO ()
+handle command es = do
+    let streamId = command |> Cmd.quizId
+    stream <- fetchStream es "GameRound" streamId :: IO (Stream DomainEvent)
+    let state = replay stream countPlayersInRound
+    let expectedStreamSeq = 1 + foldl' max 0 (streamSeq <$> stream)
+    appendToStream es "GameRound" streamId expectedStreamSeq $ aggregateAction command state
+
+aggregateAction :: Cmd.Command -> State -> DomainEvent
+aggregateAction (Cmd.StartRound quizId) _ = RoundHasStarted quizId
+aggregateAction (Cmd.JoinRound quizId playerId) state =
+    if state < 3
+        then PlayerHasJoined quizId playerId
+        else RoundIsFull quizId playerId
