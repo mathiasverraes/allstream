@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns        #-}
 
 module EventStore
     ( EventStore
@@ -44,9 +45,8 @@ data PersistedEvent e =
         , streamId     :: StreamId
         , streamSeq    :: Int
         }
-    deriving (Show)
 
-class (FromJSON a, ToJSON a) =>
+class (FromJSON a, ToJSON a, Show a) =>
       Payload a
     where
     eventType :: a -> EventType
@@ -101,3 +101,17 @@ appendToStream conn streamType streamId expectedStreamSeq event = do
         , toSql expectedStreamSeq
         ]
     commit conn
+
+instance (Payload e) => Show (PersistedEvent e) where
+    show Persisted {partitionSeq, eventPayload, streamType, streamId, streamSeq, recordedTime} =
+        "#" ++
+        show partitionSeq ++
+        "\t" ++
+        streamType ++
+        " v" ++
+        show streamSeq ++
+        " (" ++
+        take 7 (show streamId) ++
+        ")\t" ++
+        take 19 recordedTime ++
+        "\n\t" ++ show eventPayload ++ "\n"
