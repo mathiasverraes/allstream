@@ -2,12 +2,12 @@ module AllStream
     ( go
     ) where
 
-import qualified Data.UUID.V4    as UUID (nextRandom)
-import           Domain.Commands (Command (..))
+import           CommandHandler
+import qualified Data.UUID.V4     as UUID (nextRandom)
+import           Domain.Commands  (Command (..))
 import           Domain.Events
 import           Domain.GameRound
 import           EventStore
-
 
 go :: IO ()
 go = do
@@ -19,24 +19,13 @@ go = do
     playerId3 <- UUID.nextRandom
     playerId4 <- UUID.nextRandom
     --
-    handle (StartRound quizId1) eventStore
-    handle (JoinRound quizId1 playerId1) eventStore
-    handle (JoinRound quizId1 playerId2) eventStore
-    handle (JoinRound quizId1 playerId3) eventStore
-    handle (JoinRound quizId1 playerId4) eventStore
-    --let outcome = handle command ()
-    {-
-    appendToStream conn "GameRound" quizId1 1 (RoundHasStarted quizId1)
-    appendToStream conn "GameRound" quizId2 1 (RoundHasStarted quizId2)
-    appendToStream conn "GameRound" quizId1 2 (PlayerHasJoined quizId1 playerId1)
-    appendToStream conn "GameRound" quizId2 2 (PlayerHasJoined quizId2 playerId1)
-    appendToStream conn "GameRound" quizId1 3 (PlayerHasJoined quizId1 playerId2)
-    -}
-    --
+    let handle = makeCmdHdlr gameRound eventStore
+    handle (StartRound quizId1)
+    handle (JoinRound quizId1 playerId1)
+    handle (JoinRound quizId1 playerId2)
+    handle (JoinRound quizId1 playerId3)
+    handle (JoinRound quizId1 playerId4)
+
     stream' <- fetchAll eventStore :: IO (Stream DomainEvent)
     mapM_ print stream'
-    --
-    -- stream2' <- fetchStream conn "GameRound" quizId1 :: IO (Stream DomainEvent)
-    -- mapM_ print (eventPayload <$> stream2')
-    --
-    --return ()
+

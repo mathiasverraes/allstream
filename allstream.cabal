@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e37a449103dd79ea338d8edc886cd4950d0944f2afa8ab3ea08b1f43902a7482
+-- hash: 16d998dca3f78b7784a0876158c444d595dd38fce809abf6ff59cd277d747178
 
 name:           allstream
 version:        0.1.0.0
@@ -28,11 +28,14 @@ source-repository head
 library
   exposed-modules:
       AllStream
+      CommandHandler
       Domain.Commands
       Domain.Events
       Domain.GameRound
       Domain.Types
       EventStore
+      Experiments.Conc
+      Experiments.MyGadt
       Projection
   other-modules:
       Paths_allstream
