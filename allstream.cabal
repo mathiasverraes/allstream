@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 16d998dca3f78b7784a0876158c444d595dd38fce809abf6ff59cd277d747178
+-- hash: 012923bd0eb5dccd493ae685c3ec46876653b601ec4d35022131a1ee8e6b76b8
 
 name:           allstream
 version:        0.1.0.0
@@ -34,8 +34,8 @@ library
       Domain.GameRound
       Domain.Types
       EventStore
-      Experiments.Conc
-      Experiments.MyGadt
+      Experiments.MT
+      MessageType
       Projection
   other-modules:
       Paths_allstream
@@ -50,6 +50,7 @@ library
     , bytestring
     , containers
     , flow
+    , free
     , unordered-containers
     , uuid
   default-language: Haskell2010
@@ -70,6 +71,7 @@ executable allstream-exe
     , bytestring
     , containers
     , flow
+    , free
     , unordered-containers
     , uuid
   default-language: Haskell2010
@@ -91,6 +93,7 @@ test-suite allstream-test
     , bytestring
     , containers
     , flow
+    , free
     , unordered-containers
     , uuid
   default-language: Haskell2010

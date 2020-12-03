@@ -29,6 +29,7 @@ dependencies:
 - containers
 - bytestring
 - flow
+- free
 
 library:
   source-dirs: src

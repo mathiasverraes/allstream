@@ -3,7 +3,7 @@ module CommandHandler where
 import EventStore 
 import qualified Domain.Commands as Cmd
 import Projection
-import Flow ((|>))
+import Flow ((|>), (<|))
 import Data.Foldable (foldl') 
 
 data CommandHandlerSpec event state response =
@@ -20,13 +20,13 @@ makeCmdHdlr ::
     -> EventStore event
     -> Cmd.Command
     -> IO ()
-makeCmdHdlr cmdHdlSpec es command = do
-    let streamId = (cmdHdlSpec |> getStreamId) command
-    let streamType = (cmdHdlSpec |> getStreamType) command
-    let projection = (cmdHdlSpec |> getProjection) command
-    let constraint = (cmdHdlSpec |> getConstraint) command
+makeCmdHdlr (CommandHandlerSpec getStreamId getStreamType getProjection getConstraint) es cmd = do
+    let streamId = getStreamId cmd
+    let streamType = getStreamType cmd
+    let projection = getProjection cmd
+    let constraint = getConstraint cmd
     stream <- fetchStream es streamType streamId
     let response = replay stream projection
     let expectedStreamSeq = 1 + foldl' max 0 (streamSeq <$> stream)
-    let outcome = constraint command response
+    let outcome = constraint cmd response
     appendToStream es streamType streamId expectedStreamSeq outcome
